@@ -15,5 +15,6 @@ The following project has been made to automate the process of moving Jira ticke
     * gitUrl
     * gitAuthToken
        * **Note:** To generate a github token goto: [https://github.com/settings/tokens](https://github.com/settings/tokens) 
+       (Might need an admin token)
     * jiraUrl
   * Now run the script using Java.
