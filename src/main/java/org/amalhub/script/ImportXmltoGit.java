@@ -30,10 +30,10 @@ public class ImportXmltoGit {
         String title = "";
         int counter = 0;
         try {
-            File fXmlFile = new File(xmlFilePath);
+            File xmlFile = new File(xmlFilePath);
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(fXmlFile);
+            Document doc = dBuilder.parse(xmlFile);
             doc.getDocumentElement().normalize();
 
             NodeList itemList = doc.getElementsByTagName("item");
