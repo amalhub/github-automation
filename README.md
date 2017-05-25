@@ -1,6 +1,6 @@
 # github-automation
 
-The following project has been made to automate the process of moving Jira tickets to Github issues. In this approach I've used the Jira issue list export functionality to export the issue list into an XML file and then using the Github API, I have automate the process of pushing the issue list into Github.
+The following project has been made to automate the process of moving Jira tickets to Github issues. In this approach I've used the Jira issue list export functionality to export the issue list into an XML file and then using the Github API, I have automated the process of pushing the issue list into Github.
 
 #### 1. Exporting the issue list from Jira
 
@@ -15,5 +15,6 @@ The following project has been made to automate the process of moving Jira ticke
     * gitUrl
     * gitAuthToken
        * **Note:** To generate a github token goto: [https://github.com/settings/tokens](https://github.com/settings/tokens) 
+       (Might need an admin token)
     * jiraUrl
-  * Now run the script using Java.
+  * After updating the configurations run the script using Java.
