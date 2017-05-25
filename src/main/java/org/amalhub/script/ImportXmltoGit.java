@@ -24,6 +24,7 @@ public class ImportXmltoGit {
     private static final String xmlFilePath = "/home/daag/Downloads/CDMF_JiraList.xml";
     private static final String gitUrl = "https://api.github.com/repos/amalhub/test/issues";
     private static final String gitAuthToken = "88f0a72392f1fadee2e18d32db7dc10076d526a4";
+    private static final String jiraUrl = "https://wso2.org/jira/browse/";
 
     public static void main(String[] args) {
         String title = "";
@@ -42,7 +43,7 @@ public class ImportXmltoGit {
                 NodeList contentList = item.getChildNodes();
                 title = "";
                 String description = "";
-                String url = "https://wso2.org/jira/browse/";
+                String url = jiraUrl;
                 String label = "";
                 for (int j = 0; j < contentList.getLength(); j++) {
                     Node node = contentList.item(j);
