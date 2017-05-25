@@ -17,4 +17,4 @@ The following project has been made to automate the process of moving Jira ticke
        * **Note:** To generate a github token goto: [https://github.com/settings/tokens](https://github.com/settings/tokens) 
        (Might need an admin token)
     * jiraUrl
-  * Now run the script using Java.
+  * After updating the configurations run the script using Java.
