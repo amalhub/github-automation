@@ -12,7 +12,7 @@ The following project has been made to automate the process of moving Jira ticke
   * Download this project into your machine and build it using Maven.
   * Now you need to update the configuration setting in the **ImportXmltoGit.java** file before running the program.
     * xmlFilePath
-    * gitUrl => https://api.github.com/repos/**:user**/**:repo**/issues
+    * gitUrl => https://<span></span>api.github<span></span>.com/repos/**:user**/**:repo**/issues
     * gitAuthToken
        * **Note:** To generate a github token goto: [https://github.com/settings/tokens](https://github.com/settings/tokens) 
        (Might need an admin token)
