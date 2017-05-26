@@ -67,6 +67,12 @@ public class ImportXmltoGit {
                 description += "<p>Reference: <a href='" + url + "'>" + url + "</a></p>";
                 description = description.replace("\n", "");
                 description = description.replace("\t", "");
+                description = description.replace("\\", "\\\\");
+                description = description.replace("\"", "\\\"");
+                title = title.replace("\n", "");
+                title = title.replace("\t", "");
+                title = title.replace("\\", "\\\\");
+                title = title.replace("\"", "\\\"");
                 System.out.println("Processing id:" + counter + " => " + title + "\n");
                 addGitIssue(title, description, label);
             }
