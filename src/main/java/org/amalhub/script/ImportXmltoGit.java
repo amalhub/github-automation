@@ -63,6 +63,15 @@ public class ImportXmltoGit {
                             label = "enhancement";
                         }
                     }
+                    if (node.getNodeName().toString().equals("priority")) {
+                        if (node.getTextContent().toLowerCase().contains("high")) {
+                            label += "\", \"high";
+                        } else if (node.getTextContent().toLowerCase().contains("normal")) {
+                            label += "\", \"medium";
+                        } else {
+                            label += "\", \"low";
+                        }
+                    }
                 }
                 description += "<p>Reference: <a href='" + url + "'>" + url + "</a></p>";
                 description = description.replace("\n", "");
