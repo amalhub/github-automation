@@ -25,6 +25,8 @@ public class ImportXmltoGit {
     private static final String gitUrl = "https://api.github.com/repos/amalhub/test/issues";
     private static final String gitAuthToken = "88f0a72392f1fadee2e18d32db7dc10076d526a4";
     private static final String jiraUrl = "https://wso2.org/jira/browse/";
+    //If there are no additional labels make this property null. Make sure to follow the given format
+    private static final String additionalLables = "\", \"jira";
 
     public static void main(String[] args) {
         String title = "";
@@ -71,6 +73,9 @@ public class ImportXmltoGit {
                         } else {
                             label += "\", \"low";
                         }
+                    }
+                    if (additionalLables != null && !additionalLables.isEmpty()) {
+                        label += additionalLables;
                     }
                 }
                 description += "<p>Reference: <a href='" + url + "'>" + url + "</a></p>";
