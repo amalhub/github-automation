@@ -16,14 +16,13 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 
 public class ImportXmltoGit {
     //Update these configurations according to your setup.
-    private static final String xmlFilePath = "/home/daag/Downloads/CDMF_JiraList.xml";
-    private static final String gitUrl = "https://api.github.com/repos/amalhub/test/issues";
-    private static final String gitAuthToken = "88f0a72392f1fadee2e18d32db7dc10076d526a4";
+    private static final String xmlFilePath = "CDMF_JiraList.xml";
+    private static final String gitUrl = "https://api.github.com/repos/madhawap/test/issues";
+    private static final String gitAuthToken = "";
     private static final String jiraUrl = "https://wso2.org/jira/browse/";
 
     public static void main(String[] args) {
@@ -31,9 +30,16 @@ public class ImportXmltoGit {
         int counter = 0;
         try {
             File xmlFile = new File(xmlFilePath);
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(xmlFile);
+            FileInputStream fis = new FileInputStream(xmlFile);
+            DataInputStream dis = new DataInputStream(fis);
+            byte[] keyBytes = new byte[(int) xmlFile.length()];
+            dis.readFully(keyBytes);
+            dis.close();
+            String xmlString = new String(keyBytes);
+            xmlString = xmlString.replaceAll("&", "&amp;");
+
+            DocumentBuilder newDocumentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document doc = newDocumentBuilder.parse(new ByteArrayInputStream(xmlString.getBytes()));
             doc.getDocumentElement().normalize();
 
             NodeList itemList = doc.getElementsByTagName("item");
@@ -49,9 +55,12 @@ public class ImportXmltoGit {
                     Node node = contentList.item(j);
                     if (node.getNodeName().toString().equals("title")) {
                         title = node.getTextContent();
+                        title = title.trim();
                     }
                     if (node.getNodeName().toString().equals("description")) {
                         description = node.getTextContent();
+                        description = description.trim();
+                        description += "\n";
                     }
                     if (node.getNodeName().toString().equals("key")) {
                         url += node.getTextContent();
