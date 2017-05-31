@@ -1,0 +1,81 @@
+<rss version="0.92">
+    <channel>
+        <title>WSO2 JIRA</title>
+        <link>https://wso2.org/jira</link>
+        <description>This file is an XML representation of an issue</description>
+        <language>en-uk</language>
+        <build-info>
+            <version>7.2.2</version>
+            <build-number>72004</build-number>
+            <build-date>20-09-2016</build-date>
+        </build-info>
+        <item>
+            <title>
+                [DOCUMENTATION-4486] Configuring OpenID Connect Single Logout, 'How it Works' is not clear and accurate
+            </title>
+            <link>https://wso2.org/jira/browse/DOCUMENTATION-4486</link>
+            <project id="10261" key="DOCUMENTATION">WSO2 Documentation</project>
+            <description>
+                <p><a href="https://docs.wso2.com/display/IS540/Configuring+OpenID+Connect+Single+Logout" class="external-link" rel="nofollow">https://docs.wso2.com/display/IS540/Configuring+OpenID+Connect+Single+Logout</a></p> <p>In the above document 'How it Works' section is not clear and accurate. It should be as follows;</p> <p><b>How it Works?</b><br/> OpenID Connect session management works with two hidden iframes where both resides at the RP, one is from the RP itself and the other is from the OP. Here when authenticating, OP sends an iframe to RP. RP embed this OP provided iframe into the RP. The RP checks the session state via the RP iframe by continuously polling the embedded OP provided iframe, without causing network traffic. Thereby, the RP is notified when the session state of the end-user has changed. The flow of this is as follows. </p> <ol> <li>The RP iframe polls the OP iframe for a session status.</li> <li>The OP iframe sends back a message (by using HTML5 Winodw.postMessage()) about the session state as 'changed, 'unchanged' or 'error'.</li> <li>If the session state is 'changed', the RP sends a passive request for re-authentication.</li> <li>If the end user has logged out from the OP, the RP will receive an authentication failure message along with a new session state value. The RP handles this as a end user logout.</li> <li>If the end user has not logged out, the RP will receive a successful authentication response along with a new session state value.</li> </ol>
+            </description>
+            <environment/>
+            <key id="88775">DOCUMENTATION-4486</key>
+            <summary>
+                Configuring OpenID Connect Single Logout, 'How it Works' is not clear and accurate
+            </summary>
+            <type id="1" iconUrl="https://wso2.org/jira/secure/viewavatar?size=xsmall&avatarId=11623&avatarType=issuetype">Bug</type>
+            <priority id="3" iconUrl="https://wso2.org/jira/images/icons/priorities/major.svg">Normal</priority>
+            <status id="1" iconUrl="https://wso2.org/jira/images/icons/statuses/open.png" description="The issue is open and ready for the assignee to start work on it.">Open</status>
+            <statusCategory id="2" key="new" colorName="blue-gray"/>
+            <resolution id="-1">Unresolved</resolution>
+            <assignee username="nirdesha@wso2.com">Nirdesha Munasinghe</assignee>
+            <reporter username="thilinamad@wso2.com">Thilina Madumal</reporter>
+            <labels></labels>
+            <created>Wed, 31 May 2017 04:43:14 +0530</created>
+            <updated>Wed, 31 May 2017 04:54:24 +0530</updated>
+            <due/>
+            <votes>0</votes>
+            <watches>1</watches>
+            <attachments></attachments>
+            <subtasks></subtasks>
+            <customfields>
+                <customfield id="customfield_10040" key="com.atlassian.jira.plugin.system.customfieldtypes:select">
+                    <customfieldname>Estimated Complexity</customfieldname>
+                    <customfieldvalues>
+                        <customfieldvalue key="10012">
+                            <![CDATA[ Moderate ]]>
+                        </customfieldvalue>
+                    </customfieldvalues>
+                </customfield>
+                <customfield id="customfield_10320" key="com.pyxis.greenhopper.jira:gh-lexo-rank">
+                    <customfieldname>Rank</customfieldname>
+                    <customfieldvalues>
+                        <customfieldvalue>0|i0d4bb:</customfieldvalue>
+                    </customfieldvalues>
+                </customfield>
+                <customfield id="customfield_10122" key="com.pyxis.greenhopper.jira:gh-global-rank">
+                    <customfieldname>Rank (Obsolete)</customfieldname>
+                    <customfieldvalues>
+                        <customfieldvalue>9223372036854775807</customfieldvalue>
+                    </customfieldvalues>
+                </customfield>
+                <customfield id="customfield_10075" key="com.atlassian.jira.plugin.system.customfieldtypes:select">
+                    <customfieldname>Severity</customfieldname>
+                    <customfieldvalues>
+                        <customfieldvalue key="10039">
+                            <![CDATA[ Major ]]>
+                        </customfieldvalue>
+                    </customfieldvalues>
+                </customfield>
+                <customfield id="customfield_10090" key="com.atlassian.jira.plugin.system.customfieldtypes:select">
+                    <customfieldname>Test cases added</customfieldname>
+                    <customfieldvalues>
+                        <customfieldvalue key="10061">
+                            <![CDATA[ Yes ]]>
+                        </customfieldvalue>
+                    </customfieldvalues>
+                </customfield>
+            </customfields>
+        </item>
+    </channel>
+</rss>
