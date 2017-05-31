@@ -44,7 +44,7 @@ public class ImportXmltoGit {
                 Node item = itemList.item(i);
                 NodeList contentList = item.getChildNodes();
                 title = "";
-                String description = "";
+                String description = "<p>";
                 String url = jiraUrl;
                 String label = "";
                 for (int j = 0; j < contentList.getLength(); j++) {
@@ -78,7 +78,7 @@ public class ImportXmltoGit {
                         label += additionalLabels;
                     }
                 }
-                description += "<p>Reference: <a href='" + url + "'>" + url + "</a></p>";
+                description += "</p><p>Reference: <a href='" + url + "'>" + url + "</a></p>";
                 description = description.replace("\n", "");
                 description = description.replace("\t", "");
                 description = description.replace("\\", "\\\\");
