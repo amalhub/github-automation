@@ -22,6 +22,6 @@ The following project has been made to automate the process of moving Jira ticke
 
 #### 3. Updating the Jira issues
 
-   If you want to perform a bulk operation on the moved Jira issues, refer [https://goo.gl/nW68B1](JiraDoc) (Editing multiple Jira issues at the same time). Using this functionality you can add a comment in the Jira directing the user to the Github issue list (Since the Git issue header contains the Jira issue ID, user can easily search for it).
+   If you want to perform a bulk operation on the moved Jira issues, refer: [Editing multiple Jira issues at the same time](https://confluence.atlassian.com/jiracoreserver073/editing-multiple-issues-at-the-same-time-861257342.html). Using this functionality you can add a comment in the Jira directing the user to the Github issue list (Since the Git issue header contains the Jira issue ID, user can easily search for it).
 
    **Example comment:** *"Moved to Github issues: ${link}. Search with Jira issue ID to find it in Git."*
