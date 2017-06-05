@@ -3,11 +3,15 @@
  */
 package org.amalhub.script;
 
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -17,6 +21,12 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ImportXmltoGit {
     //Update these configurations according to your setup.
@@ -24,6 +34,9 @@ public class ImportXmltoGit {
     private static final String gitUrl = "https://api.github.com/repos/madhawap/test/issues";
     private static final String gitAuthToken = "";
     private static final String jiraUrl = "https://wso2.org/jira/browse/";
+
+    private static final String jiraUser = "";
+    private static final String jiraPass = "";
 
     public static void main(String[] args) {
         String title = "";
@@ -36,7 +49,7 @@ public class ImportXmltoGit {
             dis.readFully(keyBytes);
             dis.close();
             String xmlString = new String(keyBytes);
-            xmlString = xmlString.replaceAll("&", "&amp;");
+            xmlString = createValidXml(xmlString);
 
             DocumentBuilder newDocumentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             Document doc = newDocumentBuilder.parse(new ByteArrayInputStream(xmlString.getBytes()));
@@ -77,7 +90,7 @@ public class ImportXmltoGit {
                 description = description.replace("\n", "");
                 description = description.replace("\t", "");
                 System.out.println("Processing id:" + counter + " => " + title + "\n");
-                addGitIssue(title, description, label);
+                addGitIssue(title, description, label, url);
             }
         } catch (IOException | ParserConfigurationException | SAXException e) {
             System.out.println("Creating issue failed: " + title);
@@ -86,15 +99,45 @@ public class ImportXmltoGit {
         }
     }
 
-    private static void addGitIssue(String title, String description, String label) throws IOException {
-        String payload = "{\n" +
-                "  \"title\": \"" + title + "\",\n" +
-                "  \"body\": \"" + description + "\",\n" +
-                "  \"labels\": [\n" +
-                "    \"" + label + "\"\n" +
-                "  ]\n" +
-                "}";
-        System.out.println(payload);
+    private static String createValidXml(String xmlString) {
+        xmlString = xmlString.replaceAll("&", "&amp;");
+
+        String descTag = "<description>\n                ";
+        Pattern xml = Pattern.compile(descTag);
+        Matcher match = xml.matcher(xmlString);
+
+        int startIndex, endIndex;
+
+        while (match.find()) {
+            endIndex = match.end();
+
+            StringBuilder sb = new StringBuilder(xmlString);
+            sb.insert(endIndex, "<![CDATA[");
+            xmlString = sb.toString();
+        }
+
+        descTag = "\n            </description>";
+        xml = Pattern.compile(descTag);
+        match = xml.matcher(xmlString);
+        while (match.find()) {
+            startIndex = match.start();
+
+            StringBuilder sb = new StringBuilder(xmlString);
+            sb.insert(startIndex, "]]>");
+            xmlString = sb.toString();
+        }
+        return xmlString;
+    }
+
+    private static void addGitIssue(String title, String description, String label, String jiraUrl) throws IOException {
+        JSONObject payload = new JSONObject();
+        payload.put("title", title);
+        payload.put("body", description);
+        JSONArray array = new JSONArray();
+        array.put(label);
+        payload.put("labels", array);
+        System.out.println(payload.toString());
+
 
         HttpPost httpPost = null;
         CloseableHttpResponse response;
@@ -102,7 +145,7 @@ public class ImportXmltoGit {
             CloseableHttpClient httpClient = HttpClientBuilder.create().build();
             httpPost = new HttpPost(gitUrl);
 
-            httpPost.setEntity(new StringEntity(payload));
+            httpPost.setEntity(new StringEntity(payload.toString()));
 
             httpPost.addHeader("Content-Type", "application/json");
             httpPost.addHeader("User-Agent", "Doctrine Jira Migration");
@@ -111,6 +154,12 @@ public class ImportXmltoGit {
             response = httpClient.execute(httpPost);
 
             System.out.println("Status of adding to git: " + response.getStatusLine().getStatusCode() + "\n");
+
+            String json = EntityUtils.toString(response.getEntity());
+            JSONObject jsonObject = new JSONObject(json);
+            String gitUrl = jsonObject.getString("url");
+            gitUrl = gitUrl.replace("api.github.com/repos", "github.com");
+            addJIRAComment(gitUrl, jiraUrl);
         } catch (IOException e) {
             throw e;
         } finally {
@@ -118,6 +167,53 @@ public class ImportXmltoGit {
                 httpPost.releaseConnection();
             }
         }
+    }
 
+    private static void addJIRAComment(String gitUrl, String jiraUrl) {
+        String requestUrl = "https://wso2.org/jira/rest/api/2/issue/" + jiraUrl.replace("https://wso2.org/jira/browse/", "") +
+                "/transitions?expand=transitions.fields";
+        JSONObject payload = new JSONObject();
+
+        JSONObject update = new JSONObject();
+        JSONArray comment = new JSONArray();
+        JSONObject add = new JSONObject();
+        add.put("body", "This issue is moved to " + gitUrl + ", thus closed.");
+        comment.put(new JSONObject().put("add", add));
+        update.put("comment", comment);
+        payload.put("update", update);
+
+        JSONObject fields = new JSONObject();
+        JSONObject resolution = new JSONObject();
+        resolution.put("name", "Duplicate");
+        fields.put("resolution", resolution);
+        payload.put("fields", fields);
+
+        JSONObject transition = new JSONObject();
+        transition.put("id", "2");
+        payload.put("transition", transition);
+
+        System.out.print(payload.toString());
+
+        HttpPost httpPost = null;
+        CloseableHttpResponse response;
+        try {
+            CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+            httpPost = new HttpPost(requestUrl);
+            httpPost.setEntity(new StringEntity(payload.toString()));
+
+            String userpass = jiraUser + ":" + jiraPass;
+            String basicAuth = "Basic " + javax.xml.bind.DatatypeConverter.printBase64Binary(userpass.getBytes("UTF-8"));
+            httpPost.addHeader("Content-Type", "application/json");
+            httpPost.addHeader("Authorization", basicAuth);
+            response = httpClient.execute(httpPost);
+            String responseString = EntityUtils.toString(response.getEntity());
+            System.out.println(responseString);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
