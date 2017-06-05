@@ -25,6 +25,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,11 +34,13 @@ public class ImportXmltoGit {
     //Update these configurations according to your setup.
     private static final String xmlFilePath = "CDMF_JiraList.xml";
     private static final String gitUrl = "https://api.github.com/repos/madhawap/test/issues";
-    private static final String gitAuthToken = "";
+    private static final String gitAuthToken = "65369278e4980c8b8b39de43814748093808e04d";
     private static final String jiraUrl = "https://wso2.org/jira/browse/";
 
     private static final String jiraUser = "";
     private static final String jiraPass = "";
+
+    private static List<String> failedIssues = new ArrayList<>();
 
     public static void main(String[] args) {
         String title = "";
@@ -50,6 +54,7 @@ public class ImportXmltoGit {
             dis.close();
             String xmlString = new String(keyBytes);
             xmlString = createValidXml(xmlString);
+//            System.out.println(xmlString);
 
             DocumentBuilder newDocumentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             Document doc = newDocumentBuilder.parse(new ByteArrayInputStream(xmlString.getBytes()));
@@ -85,12 +90,25 @@ public class ImportXmltoGit {
                             label = "enhancement";
                         }
                     }
+                    if (node.getNodeName().toString().equals("priority")) {
+                        if (node.getTextContent().toLowerCase().contains("high")) {
+                            label += "\", \"high";
+                        } else if (node.getTextContent().toLowerCase().contains("normal")) {
+                            label += "\", \"medium";
+                        } else {
+                            label += "\", \"low";
+                        }
+                    }
                 }
                 description += "<p>Reference: <a href='" + url + "'>" + url + "</a></p>";
                 description = description.replace("\n", "");
                 description = description.replace("\t", "");
                 System.out.println("Processing id:" + counter + " => " + title + "\n");
                 addGitIssue(title, description, label, url);
+            }
+            System.out.println("---------------------Failed issues----------------------");
+            for (String issue: failedIssues) {
+                System.out.println(issue);
             }
         } catch (IOException | ParserConfigurationException | SAXException e) {
             System.out.println("Creating issue failed: " + title);
@@ -100,31 +118,34 @@ public class ImportXmltoGit {
     }
 
     private static String createValidXml(String xmlString) {
+        xmlString = xmlString.replaceAll("&#91;", "[");
+        xmlString = xmlString.replaceAll("&#93;", "]");
         xmlString = xmlString.replaceAll("&", "&amp;");
 
         String descTag = "<description>\n                ";
         Pattern xml = Pattern.compile(descTag);
         Matcher match = xml.matcher(xmlString);
 
-        int startIndex, endIndex;
-
+        int spacing = 0;
         while (match.find()) {
-            endIndex = match.end();
-
+            int endIndex = match.end();
             StringBuilder sb = new StringBuilder(xmlString);
-            sb.insert(endIndex, "<![CDATA[");
+            sb.insert(endIndex + spacing, "<![CDATA[");
             xmlString = sb.toString();
+            spacing += 9;
         }
 
         descTag = "\n            </description>";
         xml = Pattern.compile(descTag);
         match = xml.matcher(xmlString);
-        while (match.find()) {
-            startIndex = match.start();
 
+        spacing = 0;
+        while (match.find()) {
+            int startIndex = match.start();
             StringBuilder sb = new StringBuilder(xmlString);
-            sb.insert(startIndex, "]]>");
+            sb.insert(startIndex + spacing, "]]>");
             xmlString = sb.toString();
+            spacing += 3;
         }
         return xmlString;
     }
@@ -152,14 +173,19 @@ public class ImportXmltoGit {
             httpPost.addHeader("Authorization", "token " + gitAuthToken);
 
             response = httpClient.execute(httpPost);
+            int code = response.getStatusLine().getStatusCode();
 
-            System.out.println("Status of adding to git: " + response.getStatusLine().getStatusCode() + "\n");
+            System.out.println("Status of adding to git: " + code + "\n");
 
-            String json = EntityUtils.toString(response.getEntity());
-            JSONObject jsonObject = new JSONObject(json);
-            String gitUrl = jsonObject.getString("url");
-            gitUrl = gitUrl.replace("api.github.com/repos", "github.com");
-            addJIRAComment(gitUrl, jiraUrl);
+            if (code == 201) {
+                String json = EntityUtils.toString(response.getEntity());
+                JSONObject jsonObject = new JSONObject(json);
+                String gitUrl = jsonObject.getString("url");
+                gitUrl = gitUrl.replace("api.github.com/repos", "github.com");
+                addJIRAComment(gitUrl, jiraUrl);
+            } else {
+                failedIssues.add(title);
+            }
         } catch (IOException e) {
             throw e;
         } finally {
@@ -202,17 +228,20 @@ public class ImportXmltoGit {
             httpPost.setEntity(new StringEntity(payload.toString()));
 
             String userpass = jiraUser + ":" + jiraPass;
-            String basicAuth = "Basic " + javax.xml.bind.DatatypeConverter.printBase64Binary(userpass.getBytes("UTF-8"));
+            String basicAuth = "Basic  bWFkaGF3YXBAd3NvMi5jb206QEFjaEBDaGFsaWUoKSohKjE=";
+//            String basicAuth = "Basic " + javax.xml.bind.DatatypeConverter.printBase64Binary(userpass.getBytes("UTF-8"));
             httpPost.addHeader("Content-Type", "application/json");
             httpPost.addHeader("Authorization", basicAuth);
-            response = httpClient.execute(httpPost);
-            String responseString = EntityUtils.toString(response.getEntity());
-            System.out.println(responseString);
+//            response = httpClient.execute(httpPost);
+//            String responseString = EntityUtils.toString(response.getEntity());
+//            System.out.println(responseString);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        }
+//        catch (ClientProtocolException e) {
+//            e.printStackTrace();
+//        }
+        catch (IOException e) {
             e.printStackTrace();
         }
     }
