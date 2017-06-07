@@ -34,7 +34,7 @@ public class ImportXmltoGit {
     //Update these configurations according to your setup.
     private static final String xmlFilePath = "CDMF_JiraList.xml";
     private static final String gitUrl = "https://api.github.com/repos/madhawap/test/issues";
-    private static final String gitAuthToken = "65369278e4980c8b8b39de43814748093808e04d";
+    private static final String gitAuthToken = "";
     private static final String jiraUrl = "https://wso2.org/jira/browse/";
 
     private static final String jiraUser = "";
@@ -228,20 +228,17 @@ public class ImportXmltoGit {
             httpPost.setEntity(new StringEntity(payload.toString()));
 
             String userpass = jiraUser + ":" + jiraPass;
-            String basicAuth = "Basic  bWFkaGF3YXBAd3NvMi5jb206QEFjaEBDaGFsaWUoKSohKjE=";
-//            String basicAuth = "Basic " + javax.xml.bind.DatatypeConverter.printBase64Binary(userpass.getBytes("UTF-8"));
+            String basicAuth = "Basic " + javax.xml.bind.DatatypeConverter.printBase64Binary(userpass.getBytes("UTF-8"));
             httpPost.addHeader("Content-Type", "application/json");
             httpPost.addHeader("Authorization", basicAuth);
-//            response = httpClient.execute(httpPost);
-//            String responseString = EntityUtils.toString(response.getEntity());
-//            System.out.println(responseString);
+            response = httpClient.execute(httpPost);
+            String responseString = EntityUtils.toString(response.getEntity());
+            System.out.println(responseString);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
-        }
-//        catch (ClientProtocolException e) {
-//            e.printStackTrace();
-//        }
-        catch (IOException e) {
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
